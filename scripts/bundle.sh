@@ -1,16 +1,25 @@
 #!/bin/zsh
 # Builds ferroamp.app in ./dist. Pass --install to also copy it to ~/Applications.
+# FERROAMP_BINARY=path uses an already built binary instead of building one.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export PATH="/opt/homebrew/opt/rustup/bin:$HOME/.cargo/bin:$PATH"
 
-cargo build --release
+binary=${FERROAMP_BINARY:-}
+if [[ -z "$binary" ]]; then
+  cargo build --release
+  binary=target/release/ferroamp
+fi
+version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
 
 app=dist/ferroamp.app
 rm -rf "$app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
-cp target/release/ferroamp "$app/Contents/MacOS/ferroamp"
+cp "$binary" "$app/Contents/MacOS/ferroamp"
 cp assets/Info.plist "$app/Contents/Info.plist"
+plutil -replace CFBundleShortVersionString -string "$version" "$app/Contents/Info.plist"
+plutil -replace CFBundleVersion -string "$version" "$app/Contents/Info.plist"
+cp LICENSE-MIT LICENSE-APACHE THIRD_PARTY.md "$app/Contents/Resources/"
 
 # Icon: nearest-neighbour-looking pixel art at every size macOS asks for.
 iconset=$(mktemp -d)/ferroamp.iconset
@@ -22,7 +31,8 @@ for size in 16 32 64 128 256 512; do
 done
 iconutil -c icns "$iconset" -o "$app/Contents/Resources/ferroamp.icns"
 
-# Ad-hoc signature: enough for your own Mac. Distribution needs a Developer ID.
+# Ad-hoc signature: enough for your own Mac. scripts/release.sh signs properly
+# when given a Developer ID.
 codesign --force --sign - "$app" >/dev/null 2>&1
 
 echo "Built $app ($(du -sh "$app" | cut -f1))"

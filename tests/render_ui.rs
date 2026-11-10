@@ -638,3 +638,92 @@ fn something_that_is_not_a_skin_is_refused() {
     assert!(Skin::load(&dir.join("missing.wsz")).is_err());
     assert!(Skin::load(&dir).is_err(), "a folder without main.bmp");
 }
+
+/// The picture at the top of the README: the three windows docked as they
+/// first open, drawn by the same code as the app. Rewritten by every test run
+/// and only changes when the look does.
+#[test]
+fn readme_screenshot() {
+    let (b, p) = bars();
+    let mut pl = Playlist::new(7);
+    let tracks: [(&str, &str, f64); 12] = [
+        ("Night Tram", "Copper Wires", 241.0),
+        ("The Low Ohms", "Static Bloom", 198.0),
+        ("Lena Varga", "Glass Harbour", 252.0),
+        ("Paper Satellites", "Long Way Down", 305.0),
+        ("\u{591c}\u{884c}\u{5217}\u{8eca}", "\u{9752}\u{3044}\u{6642}\u{9593}", 216.0),
+        ("Kite Weather", "Sundial", 187.0),
+        ("\u{421}\u{435}\u{432}\u{435}\u{440}\u{43d}\u{44b}\u{439} \u{432}\u{435}\u{442}\u{435}\u{440}", "\u{41e}\u{433}\u{43d}\u{438}", 233.0),
+        ("Mono Lake", "Tape Hiss Lullaby", 264.0),
+        ("Kite Weather", "Afterglow", 201.0),
+        ("Orchard Static", "Quiet Engines", 278.0),
+        ("The Low Ohms", "Signal Fire", 223.0),
+        ("Lena Varga", "Salt and Silver", 290.0),
+    ];
+    let added = pl.add_paths((0..tracks.len()).map(|i| PathBuf::from(format!("/m/{i}.flac"))));
+    for ((id, _), (artist, title, secs)) in added.iter().zip(tracks) {
+        let e = pl.get_mut(*id).unwrap();
+        e.scanned = true;
+        e.info = TrackInfo {
+            artist: Some(artist.into()),
+            title: Some(title.into()),
+            duration: Some(secs),
+            ..TrackInfo::default()
+        };
+    }
+    let station = pl.add_paths([PathBuf::from("https://radio.example/late-128")])[0].0;
+    pl.get_mut(station).unwrap().info.station = Some("Late Night Radio".into());
+    pl.set_current(Some(added[2].0));
+    pl.selected = vec![added[6].0];
+    pl.toggle_queued(added[7].0);
+
+    let mut shot = Canvas::new(WIDTH * 2, PLAYLIST_H);
+    let mut paste = |c: &Canvas, x: usize, y: usize| {
+        for row in 0..c.h {
+            let at = (y + row) * shot.w + x;
+            shot.px[at..at + c.w].copy_from_slice(&c.px[row * c.w..(row + 1) * c.w]);
+        }
+    };
+    let mut main = Canvas::new(WIDTH, MAIN_H);
+    draw_main(
+        &mut main,
+        &MainView {
+            focused: true,
+            pressed: None,
+            state: PlayState::Playing,
+            position: 97.0,
+            duration: Some(252.0),
+            seek_preview: None,
+            show_remaining: false,
+            ticker: "3. Lena Varga - Glass Harbour (4:12)  ***  ",
+            ticker_offset: 0,
+            ticker_alert: false,
+            info: "920 KBPS 44 KHZ STEREO",
+            facts: TrackFacts::default(),
+            always_on_top: false,
+            volume: 0.75,
+            balance: 0.0,
+            shuffle: false,
+            repeat: Repeat::All,
+            eq_shown: true,
+            playlist_shown: true,
+            visuals_shown: false,
+            main_vis: MainVis::Spectrum,
+            bars: &b,
+            peaks: &p,
+            scope: &[0.0; SCOPE_WIDTH],
+        },
+    );
+    paste(&main, 0, 0);
+    let (name, preamp, gains) = PRESETS[1];
+    let mut eq = Canvas::new(WIDTH, EQ_H);
+    draw_eq(&mut eq, &EqView { focused: false, pressed: None, enabled: true, preset_name: name, preamp, gains });
+    paste(&eq, 0, MAIN_H);
+    let mut list = Canvas::new(WIDTH, PLAYLIST_H);
+    draw_playlist(&mut list, &PlaylistView { focused: false, pressed: None, playlist: &pl, scroll: 0, jump: None });
+    paste(&list, WIDTH, 0);
+
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("docs");
+    std::fs::create_dir_all(&dir).unwrap();
+    write_png(&shot, 2, &dir.join("screenshot.png"));
+}

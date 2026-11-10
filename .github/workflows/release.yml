@@ -1,0 +1,65 @@
+# Builds the disk image and publishes it as a GitHub release when a version
+# tag such as v0.1.0 is pushed. The tag must match the version in Cargo.toml.
+#
+# Without the optional secrets below the app is ad-hoc signed, and users see a
+# warning on first launch. To sign and notarize, add these repository secrets:
+#   MACOS_CERTIFICATE           the Developer ID Application certificate, as a
+#                               base64-encoded .p12 file
+#   MACOS_CERTIFICATE_PASSWORD  the .p12 file's password
+#   APPLE_ID, APPLE_TEAM_ID     the Apple account that notarizes
+#   APPLE_APP_PASSWORD          an app-specific password for that account
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    env:
+      HAS_CERT: ${{ secrets.MACOS_CERTIFICATE != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches Cargo.toml
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          [[ "${GITHUB_REF_NAME}" == "v$version" ]] || { echo "Tag ${GITHUB_REF_NAME} but Cargo.toml says $version"; exit 1; }
+
+      - name: Test
+        run: cargo test --locked
+
+      - name: Import the signing certificate
+        if: env.HAS_CERT == 'true'
+        env:
+          CERT: ${{ secrets.MACOS_CERTIFICATE }}
+          CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          password=$(openssl rand -hex 16)
+          echo "$CERT" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 3600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -k "$password" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          identity=$(security find-identity -v -p codesigning "$keychain" | sed -n 's/.*"\(Developer ID Application.*\)"/\1/p' | head -1)
+          echo "SIGN_IDENTITY=$identity" >> "$GITHUB_ENV"
+          xcrun notarytool store-credentials ferroamp --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --keychain "$keychain"
+          echo "NOTARY_PROFILE=ferroamp" >> "$GITHUB_ENV"
+
+      - name: Build the disk image
+        run: scripts/release.sh
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/ferroamp-*.dmg dist/ferroamp-*.dmg.sha256 --title "ferroamp ${GITHUB_REF_NAME#v}" --generate-notes

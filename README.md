@@ -3,6 +3,8 @@
 A small, fast music player for macOS in Rust, in the spirit of the classic
 desktop players of the late 90s: three compact, dockable windows and no library.
 
+![ferroamp's player, equaliser and playlist windows](docs/screenshot.png)
+
 - **Files, not a library.** Drop files or folders on it. Nothing is imported,
   moved or indexed. The playlist is a plain `.m3u8`. It opens M3U, M3U8 and
   PLS, including old playlists made on Windows: backslash paths, drive letters
@@ -33,6 +35,21 @@ desktop players of the late 90s: three compact, dockable windows and no library.
 
 Plays MP3, Ogg Vorbis, FLAC, WAV, AIFF, AAC/M4A, ALAC, MP2 and CAF.
 
+## Install
+
+Download the `.dmg` from [Releases](https://github.com/hrmau/ferroamp/releases),
+open it, and drag ferroamp to Applications. It runs on macOS 12 or later, on
+Apple silicon and Intel Macs.
+
+Releases are not yet signed with an Apple Developer ID, so macOS stops the first
+launch with a warning. To open it anyway:
+
+- **macOS 15 and later:** open ferroamp once, then go to **System Settings >
+  Privacy & Security** and click **Open Anyway** next to the message about it.
+- **Earlier versions:** right-click ferroamp in Applications and choose **Open**.
+
+You only need to do this once. Or skip it by building from source, below.
+
 ## Build
 
 Needs Rust (`brew install rustup && rustup default stable`). Rust from Homebrew's
@@ -48,6 +65,12 @@ open dist/ferroamp.app
 
 `scripts/bundle.sh --install` also copies the app to `~/Applications`. To use it
 from Finder, choose **Open With > ferroamp**. It never claims file types for itself.
+
+`scripts/release.sh` builds the downloadable disk image: one app for Apple silicon
+and Intel, with the licenses of every library inside. Pushing a version tag such
+as `v0.1.0` makes GitHub build it and publish a release. The tag has to match the
+version in `Cargo.toml`. Signing and notarizing are optional; see the comments in
+`scripts/release.sh` and `.github/workflows/release.yml`.
 
 ## Controls
 
@@ -109,7 +132,8 @@ cargo test
 
 Fixture tests generate real encoded files with `ffmpeg` and check gapless joins,
 seeking and tags sample by sample. They skip themselves if `ffmpeg` is missing.
-Window images land in `target/ui-snapshots`. To exercise the real audio device
+Window images land in `target/ui-snapshots`, and the README's picture is
+rendered the same way into `docs/`. To exercise the real audio device
 at zero volume:
 
 ```bash
