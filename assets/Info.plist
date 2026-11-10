@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key><string>ferroamp</string>
+    <key>CFBundleDisplayName</key><string>ferroamp</string>
+    <key>CFBundleExecutable</key><string>ferroamp</string>
+    <key>CFBundleIdentifier</key><string>io.github.hrmau.ferroamp</string>
+    <key>CFBundleIconFile</key><string>ferroamp</string>
+    <key>CFBundlePackageType</key><string>APPL</string>
+    <key>CFBundleShortVersionString</key><string>0.1.0</string>
+    <key>CFBundleVersion</key><string>1</string>
+    <key>LSMinimumSystemVersion</key><string>12.0</string>
+    <key>LSApplicationCategoryType</key><string>public.app-category.music</string>
+    <key>NSHighResolutionCapable</key><true/>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key><string>Audio file</string>
+            <key>CFBundleTypeRole</key><string>Viewer</string>
+            <!-- Alternate: offered in "Open With", never takes over a file type. -->
+            <key>LSHandlerRank</key><string>Alternate</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.audio</string>
+                <string>public.m3u-playlist</string>
+                <string>public.pls-playlist</string>
+            </array>
+            <key>CFBundleTypeExtensions</key>
+            <array>
+                <string>mp3</string><string>ogg</string><string>oga</string><string>flac</string>
+                <string>wav</string><string>aif</string><string>aiff</string><string>m4a</string>
+                <string>aac</string><string>caf</string><string>mka</string><string>m3u</string>
+                <string>m3u8</string><string>pls</string><string>cue</string><string>wsz</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>
