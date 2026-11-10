@@ -51,5 +51,6 @@ if [[ -n "${NOTARY_PROFILE:-}" ]]; then
   xcrun notarytool submit "$dmg" --keychain-profile "$NOTARY_PROFILE" --wait
   xcrun stapler staple "$dmg"
 fi
-shasum -a 256 "$dmg" | tee "$dmg.sha256"
+# Written from inside dist so `shasum -c` works beside the downloaded file.
+(cd dist && shasum -a 256 "${dmg:t}" | tee "${dmg:t}.sha256")
 echo "Built $dmg ($(du -h "$dmg" | cut -f1))"
