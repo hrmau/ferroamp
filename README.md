@@ -50,9 +50,9 @@ hostage. I also wanted to know how fast that is possible with an AI doing the
 typing (Claude Code, in this case).
 
 The answer: from an empty folder to gapless playback, internet radio, CUE
-sheets, classic skins and a release took four days. That is probably less time
-than I would have spent reading Reddit threads about which music player to use
-instead.
+sheets, classic skins and a release took two days, and about five hours of
+actual sessions. That is probably less time than I would have spent reading
+Reddit threads about which music player to use instead.
 
 ## Install
 
