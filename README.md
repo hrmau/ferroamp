@@ -1,5 +1,12 @@
 # ferroamp
 
+[![Latest release](https://img.shields.io/github/v/release/hrmau/ferroamp)](https://github.com/hrmau/ferroamp/releases/latest)
+[![License: MIT or Apache-2.0](https://img.shields.io/badge/license-MIT%20or%20Apache--2.0-blue)](#license)
+![macOS 12 or later](https://img.shields.io/badge/macOS-12%2B-lightgrey)
+
+**[Download ferroamp for macOS](https://github.com/hrmau/ferroamp/releases/latest/download/ferroamp.dmg)**
+(Apple silicon and Intel, macOS 12 or later) · [All releases](https://github.com/hrmau/ferroamp/releases) · [Install help](#install)
+
 A small, fast music player for macOS in Rust, in the spirit of the classic
 desktop players of the late 90s: three compact, dockable windows and no library.
 
@@ -49,8 +56,9 @@ instead.
 
 ## Install
 
-Download the `.dmg` from [Releases](https://github.com/hrmau/ferroamp/releases),
-open it, and drag ferroamp to Applications. It runs on macOS 12 or later, on
+[Download the latest `.dmg`](https://github.com/hrmau/ferroamp/releases/latest/download/ferroamp.dmg),
+open it, and drag ferroamp to Applications. Older versions are on the
+[Releases](https://github.com/hrmau/ferroamp/releases) page. It runs on macOS 12 or later, on
 Apple silicon and Intel Macs.
 
 Releases are not yet signed with an Apple Developer ID, so macOS stops the first
