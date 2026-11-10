@@ -35,6 +35,18 @@ desktop players of the late 90s: three compact, dockable windows and no library.
 
 Plays MP3, Ogg Vorbis, FLAC, WAV, AIFF, AAC/M4A, ALAC, MP2 and CAF.
 
+## Why does this exist?
+
+Mostly to see if I could. I wanted a player in the shape of the ones I grew up
+with, without an account, a subscription or a library that holds my music
+hostage. I also wanted to know how fast that is possible with an AI doing the
+typing (Claude Code, in this case).
+
+The answer: from an empty folder to gapless playback, internet radio, CUE
+sheets, classic skins and a release took four days. That is probably less time
+than I would have spent reading Reddit threads about which music player to use
+instead.
+
 ## Install
 
 Download the `.dmg` from [Releases](https://github.com/hrmau/ferroamp/releases),
